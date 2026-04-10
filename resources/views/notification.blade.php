@@ -21,7 +21,7 @@
             {{ __('app.all') }} <span class="tab-count" id="countAll">0</span>
         </button>
         <button class="notif-tab" data-filter="pelanggan">
-            {{ __('app.customer') }} <span class="tab-count" id="countPelanggan">0</span>
+            {{ __('pelanggan') }} <span class="tab-count" id="countPelanggan">0</span>
         </button>
         <button class="notif-tab" data-filter="teknisi">
             {{ __('app.technician') }} <span class="tab-count" id="countTeknisi">0</span>

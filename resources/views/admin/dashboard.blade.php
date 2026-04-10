@@ -88,7 +88,7 @@
                 <select class="filter-select" id="teknisiFilter">
                     <option value="">{{ __('app.all_technician') }}</option>
                     @foreach($teknisi_list ?? [] as $tek)
-                        <option value="{{ $tek->id }}">{{ $tek->nama_lengkap }}</option>
+                        <option value="{{ $tek->id }}">{{ $tek->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -131,7 +131,7 @@
                                 <button class="assign-btn assigned btn-assign"
                                     data-id="{{ $issue->id }}"
                                     data-title="{{ $issue->judul ?? $issue->title ?? '' }}">
-                                    {{ $issue->teknisi->nama_lengkap ?? $issue->assignee->nama_lengkap ?? 'Teknisi' }}
+                                    {{ $issue->teknisi->nama_lengkap ?? 'Ditugaskan' }}
                                 </button>
                             @else
                                 <button class="assign-btn unassigned btn-assign"
@@ -165,9 +165,9 @@
                 <div class="panel-card-body">
                     @forelse($teknisi_list ?? [] as $tek)
                     <div class="assign-panel-item">
-                        <div class="tech-avatar">{{ strtoupper(substr($tek->nama_lengkap, 0, 2)) }}</div>
+                        <div class="tech-avatar">{{ strtoupper(substr($tek->name, 0, 2)) }}</div>
                         <div>
-                            <div class="tech-name">{{ $tek->nama_lengkap }}</div>
+                            <div class="tech-name">{{ $tek->name }}</div>
                             <div class="tech-status">{{ $tek->active_tickets_count ?? 0 }} {{ __('app.active_tickets') }}</div>
                         </div>
                         <div class="tech-dot {{ ($tek->active_tickets_count ?? 0) > 0 ? 'dot-busy' : 'dot-available' }}"></div>
@@ -246,11 +246,11 @@
                 <div class="tech-select-list" id="techSelectList">
                     @foreach($teknisi_list ?? [] as $tek)
                     <div class="tech-select-item"
-                        data-tech-id="{{ $tek->id }}"
-                        data-tech-name="{{ $tek->nama_lengkap }}">
-                        <div class="tech-avatar">{{ strtoupper(substr($tek->nama_lengkap, 0, 2)) }}</div>
+                        data-tech-id="{{ $tek->user_id }}"
+                        data-tech-name="{{ $tek->name }}">
+                        <div class="tech-avatar">{{ strtoupper(substr($tek->name, 0, 2)) }}</div>
                         <div class="tech-info">
-                            <div class="tech-name">{{ $tek->nama_lengkap }}</div>
+                            <div class="tech-name">{{ $tek->name }}</div>
                             <div class="tech-sub">
                                 @if(($tek->active_tickets_count ?? 0) > 0)
                                     {{ $tek->active_tickets_count }} {{ __('app.active_tickets') }} &middot; {{ __('app.busy') }}

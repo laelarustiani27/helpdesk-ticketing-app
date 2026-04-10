@@ -118,20 +118,38 @@ if (wrapper && !wrapper.contains(e.target)) dropdown.style.display = 'none';
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-if (window.appConfig?.notifications?.unread) {
-fetchUnreadCount();
-setInterval(fetchUnreadCount, 30000);
-}
-initSidebar();
-initLoginPage();
-initDashboardFilters();
-initDashboardMonitoring();
-initImageUpload();
-initNotifPage();
-initRiwayatPage();
-initTicketsIndex();
-initTeknisiPage();
-initAssignTeknisi();
+    if (window.appConfig?.notifications?.unread) {
+        fetchUnreadCount();
+        setInterval(fetchUnreadCount, 30000);
+    }
+    initSidebar();
+    initLoginPage();
+    initDashboardFilters();
+    initDashboardMonitoring();
+    initImageUpload();
+    initNotifPage();
+    initRiwayatPage();
+    initTicketsIndex();
+    initTeknisiPage();
+    initAssignTeknisi();
+
+    const selectPelanggan = document.getElementById('selectPelanggan');
+    if (selectPelanggan) {
+        selectPelanggan.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt.value) {
+                document.querySelector('input[name="nama_pelapor"]').value = opt.dataset.nama    ?? '';
+                document.querySelector('input[name="no_telepon"]').value   = opt.dataset.telepon ?? '';
+                document.querySelector('textarea[name="alamat"]').value    = opt.dataset.alamat  ?? '';
+                document.querySelector('input[name="email"]').value        = opt.dataset.email   ?? '';
+            } else {
+                document.querySelector('input[name="nama_pelapor"]').value = '';
+                document.querySelector('input[name="no_telepon"]').value   = '';
+                document.querySelector('textarea[name="alamat"]').value    = '';
+                document.querySelector('input[name="email"]').value        = '';
+            }
+        });
+    }
 });
 
 function initSidebar() {
@@ -343,34 +361,53 @@ setTimeout(function() { toast.classList.remove('show'); }, 3500);
 }
 
 function confirmAssign() {
-if (!selectedTechId || !currentIssueId) return;
-const confirmBtn = document.getElementById('confirmAssignBtn');
-if (confirmBtn) { confirmBtn.textContent = 'Memproses...'; confirmBtn.disabled = true; confirmBtn.style.opacity = '0.7';
-}
-fetch(`${window.assignRouteBase}/${currentIssueId}/assign`, {
-method: 'POST',
-headers: { 
-    'Content-Type': 'application/json', 
-    'Accept': 'application/json',
-    'X-CSRF-TOKEN': window.csrfToken 
-},
-body: JSON.stringify({ teknisi_id: selectedTechId }),
-})
-.then(function(res) { return res.json(); })
-.then(function(data) {
-if (data.success) {
-closeAssignModal();
-updateAssignButton(currentIssueId, selectedTechName);
-showDashboardToast(selectedTechName + ' berhasil di-assign.');
-} else {
-showDashboardToast('Gagal: ' + (data.message || 'Coba lagi.'), true);
-}
-})
-.catch(function() { showDashboardToast('Terjadi kesalahan. Coba lagi.', true); })
-.finally(function() {
-if (confirmBtn) { confirmBtn.textContent = 'Assign Teknisi'; confirmBtn.disabled = false;
-confirmBtn.style.opacity = '1'; }
-});
+    if (!selectedTechId || !currentIssueId) return;
+
+    const confirmBtn = document.getElementById('confirmAssignBtn');
+    if (confirmBtn) {
+        confirmBtn.textContent = 'Memproses...';
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.7';
+    }
+
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`${window.assignRouteBase}/${currentIssueId}/assign`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({ teknisi_id: selectedTechId })
+    })
+    .then(function(res) {
+        if (!res.ok) {
+            throw new Error('HTTP status ' + res.status);
+        }
+        return res.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            closeAssignModal();
+            updateAssignButton(currentIssueId, selectedTechName);
+            showDashboardToast(selectedTechName + ' berhasil di-assign.');
+            location.reload(); // supaya langsung update ke teknisi
+        } else {
+            showDashboardToast('Gagal: ' + (data.message || 'Coba lagi.'), true);
+        }
+    })
+    .catch(function(err) {
+        console.log(err);
+        showDashboardToast('Terjadi kesalahan. Coba lagi.', true);
+    })
+    .finally(function() {
+        if (confirmBtn) {
+            confirmBtn.textContent = 'Assign Teknisi';
+            confirmBtn.disabled = false;
+            confirmBtn.style.opacity = '1';
+        }
+    });
 }
 
 function filterIssues() {
@@ -727,7 +764,7 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         if (optAktif) optAktif.classList.add('active');
         if (optNonaktif) optNonaktif.classList.remove('active');
         const hiddenStatus = form?.querySelector('input[name="status"]');
-        if (hiddenStatus) hiddenStatus.value = 'aktif';
+        if (hiddenStatus) hiddenStatus.value = 'Aktif';
         }
         btnClose?.addEventListener('click', closeTeknisiModal);
         btnBatal?.addEventListener('click', closeTeknisiModal);
@@ -741,13 +778,13 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         optAktif.classList.add('active');
         optNonaktif?.classList.remove('active');
         const hiddenStatus = form?.querySelector('input[name="status"]');
-        if (hiddenStatus) hiddenStatus.value = 'aktif';
+        if (hiddenStatus) hiddenStatus.value = 'Aktif';
         });
         optNonaktif?.addEventListener('click', function() {
         optNonaktif.classList.add('active');
         optAktif?.classList.remove('active');
         const hiddenStatus = form?.querySelector('input[name="status"]');
-        if (hiddenStatus) hiddenStatus.value = 'nonaktif';
+        if (hiddenStatus) hiddenStatus.value = 'Nonaktif';
         });
         }
 
@@ -863,12 +900,12 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         document.getElementById('statusSection').style.display = isClosed ? 'none' : '';
         if (!isClosed) document.getElementById('statusSelect').innerHTML = statusOptions(t.status);
         document.getElementById('selesaiBtn').innerHTML = !isClosed
-        ? `<a href="/teknisi/tugas/${id}/selesai" class="btn btn-selesai btn-sm">
+        ? `<button class="btn btn-selesai btn-sm" onclick="tandaiSelesai(${id})">
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                 stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg> Tandai Selesai
-        </a>` : '';
+        </button>` : '';
         loadComments(id);
         document.getElementById('detailModal').classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -879,6 +916,64 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         document.body.style.overflow = '';
         currentTicketId = null;
         }
+
+        window.tandaiSelesai = function(id) {
+        if (!confirm('Tandai tiket ini sebagai selesai?')) return;
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        fetch(`/teknisi/tugas/${id}/selesai-ajax`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                const card = document.querySelector(`.tugas-card[data-id="${id}"]`);
+                if (card) {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-10px)';
+                    setTimeout(() => card.remove(), 300);
+                }
+                closeDetail();
+                showToast('Tiket berhasil diselesaikan!', 'success');
+            } else {
+                showToast('Gagal menyelesaikan tiket', 'error');
+            }
+        })
+        .catch(() => showToast('Terjadi kesalahan', 'error'));
+    }
+
+        window.tandaiSelesaiDashboard = function(id, btn) {
+        if (!confirm('Tandai tiket ini sebagai selesai?')) return;
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        btn.disabled = true;
+        btn.textContent = 'Memproses...';
+        fetch(`/teknisi/tugas/${id}/selesai-ajax`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                const item = btn.closest('.ticket-item');
+                if (item) {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(-8px)';
+                    setTimeout(() => item.remove(), 300);
+                }
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Tandai Selesai';
+                alert('Gagal: ' + (res.message || 'Coba lagi'));
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.textContent = 'Tandai Selesai';
+            alert('Terjadi kesalahan');
+        });
+    }
 
         function statusOptions(current) {
         return [
@@ -1055,17 +1150,38 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         };
 
         function saveNotif() {
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         fetch(window.notifRoute, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': window.csrfToken },
-        body: JSON.stringify({
-        notif_enabled: document.getElementById('notif-all').checked,
-        notif_ticket: document.getElementById('notif-tiket').checked,
-        notif_assign: document.getElementById('notif-selesai').checked,
-        })
-        })
-        .then(r => r.json())
-        .then(res => { if (res.success) showSettingsToast('Pengaturan notifikasi disimpan!'); });
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({
+                notif_enabled: document.getElementById('notif-all').checked,
+                notif_ticket: document.getElementById('notif-tiket').checked,
+                notif_assign: document.getElementById('notif-selesai').checked,
+            })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.json();
+            })
+            .then(res => {
+                if (res.success) {
+                    showSettingsToast('Pengaturan notifikasi disimpan!');
+                } else {
+                    showSettingsToast('Gagal menyimpan pengaturan', true);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                showSettingsToast('Terjadi kesalahan', true);
+            });
         }
 
         function showSettingsToast(msg) {
@@ -1266,34 +1382,36 @@ if (period === 'today') periodOk = diff < 1; if (period === 'week') periodOk=dif
         });
         });
 
-        document.getElementById('closeAssignTeknisi')?.addEventListener('click', () => assignTekModal.style.display =
-        'none');
-        document.getElementById('cancelAssignTeknisi')?.addEventListener('click', () => assignTekModal.style.display =
-        'none');
-        assignTekModal?.addEventListener('click', e => { if (e.target === assignTekModal) assignTekModal.style.display =
-        'none'; });
+        document.getElementById('closeAssignTeknisi')?.addEventListener('click', () => assignTekModal.style.display = 'none');
+    document.getElementById('cancelAssignTeknisi')?.addEventListener('click', () => assignTekModal.style.display = 'none');
+    assignTekModal?.addEventListener('click', e => { 
+        if (e.target === assignTekModal) assignTekModal.style.display = 'none'; 
+    });
 
-        document.getElementById('confirmAssignTeknisi')?.addEventListener('click', function() {
+    document.getElementById('confirmAssignTeknisi')?.addEventListener('click', function() {
         const selected = document.querySelector('input[name="assign_ticket"]:checked');
         if (!selected) { alert('Pilih tiket terlebih dahulu'); return; }
 
-        fetch(`/admin/tickets/${selected.value}/assign`, {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ teknisi_id: assignTeknisiId })
+        const ticketId = selected.value;
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+
+        fetch(`/admin/tickets/${ticketId}/assign`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ assigned_to: assignTeknisiId })
         })
         .then(r => r.json())
         .then(data => {
-        if (data.success) {
-        assignTekModal.style.display = 'none';
-        alert('Tiket berhasil di-assign!');
-        } else {
-        alert('Gagal: ' + (data.message || 'Coba lagi'));
-        }
+            if (data.success) {
+                assignTekModal.style.display = 'none';
+                location.reload();
+            } else {
+                alert('Gagal: ' + (data.message || 'Coba lagi'));
+            }
         })
         .catch(() => alert('Terjadi kesalahan'));
-        });
-        }
+    });}

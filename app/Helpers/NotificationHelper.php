@@ -39,18 +39,18 @@ class NotificationHelper
         }
     }
 
-    public static function notifyCustomerReport($ticket, $customer)
+    public static function notifyCustomerReport($laporan, $pelanggan)
     {
         $admins = User::where('role', 'admin')->get();
 
         foreach ($admins as $admin) {
             $admin->notify(new IssueNotification([
                 'type'      => 'pelanggan',
-                'title'     => "{$customer->nama_lengkap} — Laporan Masalah Baru",
-                'message'   => "Pelanggan melaporkan: '{$ticket->title}' di {$ticket->location}.",
-                'location'  => $ticket->location,
-                'ticket_id' => $ticket->id,
-                'priority'  => $ticket->priority,
+                'title'     => "{$pelanggan->nama} — Laporan Masalah Baru",
+                'message'   => "Pelanggan melaporkan: '{$laporan->jenis_masalah}' di {$laporan->alamat}.",
+                'location'  => $laporan->alamat,
+                'ticket_id' => null,
+                'priority'  => 'medium',
             ]));
         }
     }

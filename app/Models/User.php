@@ -9,6 +9,9 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+    protected $primaryKey = 'id';        
+    public $incrementing = true;        
+    protected $keyType = 'int';  
 
     protected $fillable = [
         'username',
@@ -44,7 +47,7 @@ class User extends Authenticatable
 
     public function getAuthIdentifierName()
     {
-        return 'username';
+        return 'id';
     }
 
     public function getTanggalLahirFormatAttribute()

@@ -12,6 +12,7 @@ class Teknisi extends Model
     protected $table = 'teknisi';
 
     protected $fillable = [
+        'user_id',
         'name',
         'email',
         'password',   

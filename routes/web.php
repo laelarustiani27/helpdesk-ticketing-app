@@ -82,6 +82,7 @@ Route::prefix('teknisi')->name('teknisi.')->middleware(['auth', 'role:teknisi'])
     Route::post('/tugas/{id}/komentar', [TeknisiDashboardController::class, 'storeKomentar'])->name('tugas.komentar.store');
     Route::get('/tugas/{id}/kerjakan', [TeknisiDashboardController::class, 'kerjakan'])->name('tugas.kerjakan');
     Route::get('/tugas/{id}/selesai', [TeknisiDashboardController::class, 'selesai'])->name('tugas.selesai');
+    Route::post('/tugas/{id}/selesai-ajax', [TeknisiDashboardController::class, 'selesaiAjax'])->name('tugas.selesai-ajax');
     Route::get('/tugas/{id}', [TeknisiDashboardController::class, 'detailTugas'])->name('tugas.detail');
     Route::get('/riwayat', [TeknisiDashboardController::class, 'riwayat'])->name('riwayat');
     Route::get('/settings', [TeknisiSettingsController::class, 'index'])->name('settings.index');

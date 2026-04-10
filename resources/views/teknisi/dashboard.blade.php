@@ -143,7 +143,7 @@
                                 <div class="ticket-footer">
                                     <span class="ticket-reporter">
                                         {{ __('app.reported_by') }}
-                                        <strong>{{ $ticket->reporter->name ?? 'Unknown' }}</strong>
+                                        <strong>{{ $ticket->reporter->nama_lengkap ?? $ticket->reporter->username ?? 'Unknown' }}</strong>
                                     </span>
                                     <div class="ticket-actions">
                                         <a href="{{ route('teknisi.laporan.show', $ticket->id) }}"
@@ -153,8 +153,9 @@
                                             <a href="{{ route('teknisi.tugas.kerjakan', $ticket->id) }}"
                                                class="btn-kerjakan">{{ __('app.tek_start') }}</a>
                                         @elseif($ticket->status === 'in_progress')
-                                            <a href="{{ route('teknisi.tugas.selesai', $ticket->id) }}"
-                                               class="btn-selesai">{{ __('app.tek_mark_done') }}</a>
+                                            <button class="btn-selesai" onclick="tandaiSelesaiDashboard({{ $ticket->id }}, this)">
+                                                {{ __('app.tek_mark_done') }}
+                                            </button>
                                         @endif
                                     </div>
                                 </div>

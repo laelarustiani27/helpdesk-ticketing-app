@@ -139,7 +139,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0"/>
                         </svg>
-                        {{ $ticket->reported_by ?? '-' }}
+                        {{ $ticket->pelapor->nama_lengkap ?? $ticket->pelapor->name ?? $ticket->reported_by ?? '-' }}
                     </div>
                 </div>
                 <hr class="detail-panel-divider">
@@ -149,7 +149,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0"/>
                         </svg>
-                        {{ $ticket->assigned_to ?? '-' }}
+                        {{ $ticket->teknisi->nama_lengkap ?? $ticket->teknisi->name ?? '-' }}
                     </div>
                 </div>
                 <hr class="detail-panel-divider">

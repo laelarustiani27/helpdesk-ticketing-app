@@ -43,7 +43,7 @@ class PelangganController extends Controller
             'deskripsi.required'     => 'Deskripsi masalah wajib diisi.',
         ]);
 
-        LaporanPelanggan::create([
+        $laporan = LaporanPelanggan::create([
             'pelanggan_id'  => $pelanggan->id,
             'nomor_laporan' => LaporanPelanggan::generateNomor(),
             'nama_pelapor'  => $pelanggan->nama,
@@ -55,8 +55,14 @@ class PelangganController extends Controller
             'status'        => 'menunggu',
         ]);
 
+       try {
+            \App\Helpers\NotificationHelper::notifyCustomerReport($laporan, $pelanggan);
+        } catch (\Exception $e) {
+            dd('ERROR NOTIFIKASI: ' . $e->getMessage());
+        }
+
         return redirect()->route('pelanggan.dashboard')
-                         ->with('success', 'Laporan berhasil dikirim! Menunggu persetujuan admin.');
+                        ->with('success', 'Laporan berhasil dikirim! Menunggu persetujuan admin.');
     }
 
     // ─── Profil ─────────

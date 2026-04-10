@@ -6,31 +6,109 @@ use App\Http\Controllers\Controller;
 use App\Helpers\NotificationHelper;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Teknisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class TeknisiDashboardController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $user = Auth::user();
-        $tickets = Ticket::where('assigned_to', $user->id)
-            ->latest()
-            ->get();
+        $allTickets = Ticket::where('assigned_to', Auth::id())->latest()->get();
 
-        $criticalCount = $tickets->where('priority', 'critical')->count();
-        $warningCount  = $tickets->whereIn('priority', ['high', 'medium'])->count();
-        $resolvedCount = $tickets->whereIn('status', ['resolved', 'closed'])->count();
-        $totalIssues   = $tickets->count();
+        $criticalCount = $allTickets->where('priority', 'critical')->count();
+        $warningCount  = $allTickets->whereIn('priority', ['high', 'medium'])->count();
+        $resolvedCount = $allTickets->whereIn('status', ['resolved', 'closed'])->count();
+        $totalIssues   = $allTickets->count();
+
+        $tickets = $allTickets->whereNotIn('status', ['resolved', 'closed']);
 
         return view('teknisi.dashboard', compact(
-            'tickets',
-            'criticalCount',
-            'warningCount',
-            'resolvedCount',
-            'totalIssues'
+            'tickets', 'criticalCount', 'warningCount', 'resolvedCount', 'totalIssues'
         ));
+    }
+
+    public function tugas()
+    {
+        $tickets = Ticket::where('assigned_to', Auth::id())
+                        ->whereNotIn('status', ['resolved', 'closed'])
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        return view('teknisi.my-jobs', compact('tickets'));
+    }
+
+    public function riwayat()
+    {
+        $tickets = Ticket::where('assigned_to', Auth::id())
+                        ->whereIn('status', ['resolved', 'closed'])
+                        ->latest()
+                        ->get();
+
+        return view('teknisi.riwayat', compact('tickets'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $ticket = Ticket::where('id', $id)
+            ->where('assigned_to', Auth::id())
+            ->firstOrFail();
+
+        $request->validate([
+            'status' => 'required|in:open,in_progress,resolved,closed',
+        ]);
+
+        $ticket->update([
+            'status'      => $request->status,
+            'resolved_at' => in_array($request->status, ['resolved', 'closed']) ? now() : null,
+        ]);
+
+        return response()->json(['success' => true, 'status' => $ticket->status]);
+    }
+
+    public function getKomentar($id)
+    {
+        $ticket = Ticket::where('id', $id)
+            ->where('assigned_to', Auth::id())
+            ->firstOrFail();
+
+        $comments = method_exists($ticket, 'comments')
+            ? $ticket->comments()
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->map(function($c) {
+                    $user = User::find($c->user_id);
+                    return [
+                        'id'         => $c->id,
+                        'body'       => $c->body,
+                        'user_name'  => $user->nama_lengkap ?? $user->name ?? 'Teknisi',
+                        'created_at' => $c->created_at,
+                    ];
+                })
+            : collect();
+
+        return response()->json(['success' => true, 'data' => $comments]);
+    }
+
+    public function storeKomentar(Request $request, $id)
+    {
+        $ticket = Ticket::where('id', $id)
+            ->where('assigned_to', Auth::id())
+            ->firstOrFail();
+
+        $request->validate(['body' => 'required|string|max:2000']);
+
+        if (!method_exists($ticket, 'comments')) {
+            return response()->json(['success' => false, 'message' => 'Fitur komentar belum tersedia.'], 422);
+        }
+
+        $comment = $ticket->comments()->create([
+            'user_id' => Auth::id(),
+            'body'    => $request->body,
+        ]);
+
+        return response()->json(['success' => true, 'comment' => $comment]);
     }
 
     public function showLaporanForm()
@@ -67,6 +145,20 @@ class TeknisiDashboardController extends Controller
             ->with('success', 'Tiket berhasil diselesaikan.');
     }
 
+    public function selesaiAjax($id)
+    {
+        $ticket = Ticket::where('id', $id)
+            ->where('assigned_to', Auth::id())
+            ->firstOrFail();
+
+        $ticket->update([
+            'status'      => 'resolved',
+            'resolved_at' => now(),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function submitLaporan(Request $request)
     {
         $request->validate([
@@ -101,114 +193,6 @@ class TeknisiDashboardController extends Controller
             ->with('success', 'Laporan berhasil dikirim. Admin akan segera menindaklanjuti.');
     }
 
-    public function riwayat()
-    {
-        $user = Auth::user();
-        $tickets = Ticket::where(function($q) use ($user) {
-                        $q->where('assigned_to', $user->id)
-                          ->orWhere('reported_by', $user->id);
-                    })
-                    ->whereIn('status', ['resolved', 'closed'])
-                    ->latest()
-                    ->get();
-
-        return view('teknisi.riwayat', compact('tickets'));
-    }
-
-    public function tugas()
-    {
-        $user = Auth::user();
-
-        $tickets = Ticket::where(function($q) use ($user) {
-                        $q->where('assigned_to', $user->id)
-                        ->orWhere('reported_by', $user->id);
-                    })
-                    ->whereNotIn('status', ['resolved', 'closed'])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
-        return view('teknisi.my-jobs', compact('tickets'));
-    }
-
-    public function updateStatus(Request $request, $id)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::where('id', $id)
-            ->where(function($q) use ($user) {
-                $q->where('assigned_to', $user->id)
-                  ->orWhere('reported_by', $user->id);
-            })
-            ->firstOrFail();
-
-        $request->validate([
-            'status' => 'required|in:open,in_progress,resolved',
-        ]);
-
-        $ticket->update([
-            'status'      => $request->status,
-            'resolved_at' => $request->status === 'resolved' ? now() : null,
-        ]);
-
-        return response()->json(['success' => true, 'status' => $ticket->status]);
-    }
-
-    public function getKomentar($id)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::where('id', $id)
-            ->where(function($q) use ($user) {
-                $q->where('assigned_to', $user->id)
-                  ->orWhere('reported_by', $user->id);
-            })
-            ->firstOrFail();
-
-        if (method_exists($ticket, 'comments')) {
-            $comments = $ticket->comments()
-                ->orderBy('created_at', 'asc')
-                ->get()
-                ->map(function($c) {
-                    $user = \App\Models\User::where('id', $c->user_id)->first();
-                    return [
-                        'id'         => $c->id,
-                        'body'       => $c->body,
-                        'user_name'  => $user->nama_lengkap ?? $user->name ?? 'Teknisi',
-                        'created_at' => $c->created_at,
-                    ];
-                });
-        } else {
-            $comments = collect();
-        }
-
-        return response()->json(['success' => true, 'data' => $comments]);
-    }
-
-    public function storeKomentar(Request $request, $id)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::where('id', $id)
-            ->where(function($q) use ($user) {
-                $q->where('assigned_to', $user->id)
-                  ->orWhere('reported_by', $user->id);
-            })
-            ->firstOrFail();
-
-        $request->validate(['body' => 'required|string|max:2000']);
-
-        if (!method_exists($ticket, 'comments')) {
-            return response()->json(['success' => false, 'message' => 'Fitur komentar belum tersedia.'], 422);
-        }
-
-        $comment = $ticket->comments()->create([
-            'user_id' => Auth::id(),
-            'body'    => $request->body,
-        ]);
-
-        return response()->json(['success' => true, 'comment' => $comment]);
-    }
-
     public function updateProfile(Request $request)
     {
         $request->validate([
@@ -236,14 +220,9 @@ class TeknisiDashboardController extends Controller
 
     public function deleteRiwayat($id)
     {
-        $user = Auth::user();
-
         $ticket = Ticket::where('id', $id)
             ->whereIn('status', ['resolved', 'closed'])
-            ->where(function($q) use ($user) {
-                $q->where('assigned_to', $user->id)
-                ->orWhere('reported_by', $user->id);
-            })
+            ->where('assigned_to', Auth::id())
             ->firstOrFail();
 
         $ticket->delete();
@@ -251,4 +230,5 @@ class TeknisiDashboardController extends Controller
         return redirect()->route('teknisi.riwayat')
             ->with('success', 'Riwayat berhasil dihapus.');
     }
+
 }

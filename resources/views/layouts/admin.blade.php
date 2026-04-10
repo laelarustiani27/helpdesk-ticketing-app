@@ -162,6 +162,7 @@
 @stack('modals')
 
 <script>
+window.csrfToken = "{{ csrf_token() }}";
 window.appConfig = {
     notifications: {
         list      : "{{ route('admin.notifications.list') }}",

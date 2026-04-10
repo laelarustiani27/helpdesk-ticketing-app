@@ -15,15 +15,15 @@ class Ticket extends Model
         'priority',
         'location',
         'reported_by',
-        'assigned_to', 
+        'assigned_to',
         'resolved_at',
         'reported_at',
-        'nama_tempat',    
-        'alamat',         
-        'koordinat',      
-        'no_telepon',     
-        'no_lain',        
-        'email',          
+        'nama_tempat',
+        'alamat',
+        'koordinat',
+        'no_telepon',
+        'pelanggan_id',  
+        'email',
         'jenis_pemesanan',
     ];
 
@@ -44,8 +44,18 @@ class Ticket extends Model
         return $this->belongsTo(User::class, 'reported_by');
     }
 
+    public function pelanggan(): BelongsTo
+    {
+        return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function reporter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reported_by');
     }
 }

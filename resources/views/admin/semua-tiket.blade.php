@@ -328,33 +328,56 @@
                     <input type="text" name="koordinat" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box;">
                 </div>
                 <div style="font-size:11px; font-weight:700; color:#2bb0a6; text-transform:uppercase; letter-spacing:0.08em; padding-bottom:6px; border-bottom:1px solid #f1f5f9; margin-top:4px;">{{ __('app.contact_info') }}</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+    
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div style="font-size:11px; font-weight:700; color:#2bb0a6; text-transform:uppercase; letter-spacing:0.08em; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">{{ __('app.contact_info') }}</div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <label style="font-size:13px; font-weight:600; color:#374151;">ID Pelanggan</label>
+                        <select name="pelanggan_id" id="selectPelanggan"
+                            style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box; cursor:pointer;">
+                            <option value="">Pilih Pelanggan</option>
+                            @foreach($pelanggans as $p)
+                                <option value="{{ $p->id }}"
+                                    data-nama="{{ $p->nama }}"
+                                    data-telepon="{{ $p->no_telepon }}"
+                                    data-alamat="{{ $p->alamat }}"
+                                    data-email="{{ $p->email ?? '' }}">
+                                    {{ $p->no_pelanggan }} - {{ $p->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div style="display:flex; flex-direction:column; gap:6px;">
                         <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.phone') }}</label>
                         <input type="tel" name="no_telepon" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box;">
                     </div>
+
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.other_phone') }}</label>
-                        <input type="tel" name="no_lain" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box;">
+                        <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.email') }}</label>
+                        <input type="email" name="email" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box;">
                     </div>
                 </div>
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.email') }}</label>
-                    <input type="email" name="email" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box;">
+
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div style="font-size:11px; font-weight:700; color:#2bb0a6; text-transform:uppercase; letter-spacing:0.08em; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">{{ __('app.order_detail') }}</div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.order_type') }}</label>
+                        <select name="jenis_pemesanan" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box; cursor:pointer;">
+                            <option value="">{{ __('app.select') }}</option>
+                            <option value="instalasi">{{ __('app.installation') }}</option>
+                            <option value="perbaikan">{{ __('app.repair') }}</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="konsultasi">{{ __('app.consultation') }}</option>
+                            <option value="lainnya">{{ __('app.other') }}</option>
+                        </select>
+                    </div>
                 </div>
-                <div style="font-size:11px; font-weight:700; color:#2bb0a6; text-transform:uppercase; letter-spacing:0.08em; padding-bottom:6px; border-bottom:1px solid #f1f5f9; margin-top:4px;">{{ __('app.order_detail') }}</div>
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">{{ __('app.order_type') }}</label>
-                    <select name="jenis_pemesanan" style="height:40px; padding:0 14px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; background:#f9fafb; outline:none; width:100%; box-sizing:border-box; cursor:pointer;">
-                        <option value="">{{ __('app.select') }}</option>
-                        <option value="instalasi">{{ __('app.installation') }}</option>
-                        <option value="perbaikan">{{ __('app.repair') }}</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="konsultasi">{{ __('app.consultation') }}</option>
-                        <option value="lainnya">{{ __('app.other') }}</option>
-                    </select>
-                </div>
-            </div>
+            </div> 
+            </div> 
             <div style="padding:16px 24px; border-top:1px solid #f1f5f9; display:flex; gap:10px; justify-content:flex-end; background:#fafafa;">
                 <button type="button" id="tiketModalBatal" style="padding:9px 20px; background:#fff; color:#64748b; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;">
                     {{ __('app.cancel') }}

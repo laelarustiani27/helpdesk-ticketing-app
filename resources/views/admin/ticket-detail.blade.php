@@ -203,7 +203,7 @@
                     <select name="teknisi_id" id="teknisi_id" required class="filter-select" style="width:100%; margin-top:6px;">
                         <option value="">{{ __('app.select_technician') }}</option>
                         @foreach($teknisi_list as $tek)
-                            <option value="{{ $tek->id }}">{{ $tek->nama_lengkap }}</option>
+                           <option value="{{ $tek->id }}">{{ $tek->nama_lengkap }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -228,7 +228,7 @@
                     <select name="teknisi_id" id="teknisi_id" required class="filter-select" style="width:100%; margin-top:6px;">
                         <option value="">{{ __('app.select_technician') }}</option>
                         @foreach($teknisi_list as $tek)
-                            <option value="{{ $tek->id }}" {{ $ticket->assigned_to == $tek->id ? 'selected' : '' }}>
+                            <<option value="{{ $tek->id }}" {{ $ticket->assigned_to == $tek->id ? 'selected' : '' }}>
                                 {{ $tek->nama_lengkap }}
                             </option>
                         @endforeach
