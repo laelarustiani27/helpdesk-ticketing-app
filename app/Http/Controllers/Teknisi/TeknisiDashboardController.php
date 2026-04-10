@@ -137,10 +137,15 @@ class TeknisiDashboardController extends Controller
 
     public function selesai($id)
     {
-        Ticket::findOrFail($id)->update([
+        $ticket = Ticket::findOrFail($id);
+        $ticket->update([
             'status'      => 'resolved',
             'resolved_at' => now(),
         ]);
+
+        \App\Models\LaporanPelanggan::where('ticket_id', $ticket->id)
+            ->update(['status' => 'selesai']);
+
         return redirect()->route('teknisi.tugas.index')
             ->with('success', 'Tiket berhasil diselesaikan.');
     }
@@ -155,6 +160,9 @@ class TeknisiDashboardController extends Controller
             'status'      => 'resolved',
             'resolved_at' => now(),
         ]);
+
+        \App\Models\LaporanPelanggan::where('ticket_id', $ticket->id)
+            ->update(['status' => 'selesai']);
 
         return response()->json(['success' => true]);
     }
