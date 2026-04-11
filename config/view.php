@@ -1,12 +1,10 @@
- 
 <?php
 
-return [
+if (!is_dir('/tmp/views')) {
+    mkdir('/tmp/views', 0755, true);
+}
 
-    'paths' => [
-        resource_path('views'),
-    ],
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/views';
+putenv('VIEW_COMPILED_PATH=/tmp/views');
 
-    'compiled' => env('VIEW_COMPILED_PATH', storage_path('framework/views')),
-
-];
+require __DIR__ . '/../public/index.php';
