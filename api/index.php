@@ -1,27 +1,15 @@
 <?php
 
-$dirs = [
-    '/tmp/views',
-    '/tmp/storage/logs',
-    '/tmp/storage/framework/sessions',
-    '/tmp/storage/framework/cache/data',
-    '/tmp/storage/framework/views',
-];
-
-foreach ($dirs as $dir) {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
+foreach (['/tmp/views', '/tmp/logs', '/tmp/sessions', '/tmp/cache'] as $dir) {
+    is_dir($dir) || mkdir($dir, 0755, true);
 }
 
 putenv('VIEW_COMPILED_PATH=/tmp/views');
 putenv('LOG_CHANNEL=stderr');
-putenv('CACHE_DRIVER=array');
-putenv('SESSION_DRIVER=array');
+putenv('CACHE_STORE=array');
+putenv('SESSION_DRIVER=cookie');
 
-$_ENV['VIEW_COMPILED_PATH'] = '/tmp/views';
-$_ENV['LOG_CHANNEL'] = 'stderr';
-$_ENV['CACHE_DRIVER'] = 'array';
-$_ENV['SESSION_DRIVER'] = 'array';
+$_SERVER['VIEW_COMPILED_PATH'] = '/tmp/views';
 
+// Load Laravel
 require __DIR__ . '/../public/index.php';
