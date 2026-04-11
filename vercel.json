@@ -1,14 +1,10 @@
 {
     "version": 2,
     "framework": null,
-    "build": {
-        "env": {
-            "APP_ENV": "production"
-        }
-    },
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.7.2"
+            "runtime": "vercel-php@0.7.2",
+            "maxDuration": 30
         }
     },
     "routes": [
