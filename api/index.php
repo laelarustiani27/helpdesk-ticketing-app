@@ -1,25 +1,27 @@
 <?php
 
-if (!is_dir('/tmp/views')) {
-    mkdir('/tmp/views', 0755, true);
-}
+$dirs = [
+    '/tmp/views',
+    '/tmp/storage/logs',
+    '/tmp/storage/framework/sessions',
+    '/tmp/storage/framework/cache/data',
+    '/tmp/storage/framework/views',
+];
 
-if (!is_dir('/tmp/storage/logs')) {
-    mkdir('/tmp/storage/logs', 0755, true);
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
 }
-
-if (!is_dir('/tmp/storage/framework/sessions')) {
-    mkdir('/tmp/storage/framework/sessions', 0755, true);
-}
-
-if (!is_dir('/tmp/storage/framework/cache')) {
-    mkdir('/tmp/storage/framework/cache', 0755, true);
-}
-
-$_ENV['VIEW_COMPILED_PATH'] = '/tmp/views';
-$_ENV['LOG_CHANNEL'] = 'stderr';
 
 putenv('VIEW_COMPILED_PATH=/tmp/views');
 putenv('LOG_CHANNEL=stderr');
+putenv('CACHE_DRIVER=array');
+putenv('SESSION_DRIVER=array');
+
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/views';
+$_ENV['LOG_CHANNEL'] = 'stderr';
+$_ENV['CACHE_DRIVER'] = 'array';
+$_ENV['SESSION_DRIVER'] = 'array';
 
 require __DIR__ . '/../public/index.php';
